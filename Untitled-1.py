@@ -3,6 +3,7 @@ import os
 import ttkbootstrap as tb
 from ttkbootstrap.constants import *
 from tkinter import messagebox, Toplevel, Entry, Label, Button, IntVar, Spinbox
+window_open = False
 
 # Adatbázis inicializálása a script mappájában
 script_dir = os.path.dirname(os.path.abspath(__file__))
@@ -24,11 +25,9 @@ c.execute('''CREATE TABLE IF NOT EXISTS foglalasok (
     szek_szam INTEGER,
     FOREIGN KEY (terem_szam) REFERENCES termek(terem_szam)
 )''')
-
-
 """c.executemany("INSERT INTO termek (terem_szam, film_cim, kapacitas) VALUES (?, ?, ?)", [
     (1, "Titanic", 100),
-    (2, "Inception", 80),
+    (2, "Inception", 3),
     (3, "Interstellar", 120)
 ])"""
 conn.commit()
@@ -111,18 +110,24 @@ def jegyfoglalas_ablak(terem_szam, film_cim, szabad_helyek, frissit_film_lista):
     Button(foglalas_window, text="Foglalás", command=foglalas).pack(pady=10)
 
 def mutat_film_informacio(terem_szam, film_cim, kapacitas, foglalt_helyek, frissit_film_lista):
-    info_window = Toplevel()
-    info_window.title("Film Információ")
-    info_window.geometry("300x200")
-    szabad_helyek = kapacitas - foglalt_helyek
-    Label(info_window, text=f"Film: {film_cim}", font=("Arial", 14)).pack(pady=5)
-    Label(info_window, text=f"Összes férőhely: {kapacitas}").pack()
-    Label(info_window, text=f"Foglalt helyek: {foglalt_helyek}").pack()
-    Label(info_window, text=f"Szabad helyek: {szabad_helyek}").pack()
-    if szabad_helyek != 0:
-        Button(info_window, text="Foglalás", command=lambda: [jegyfoglalas_ablak(terem_szam, film_cim, szabad_helyek, frissit_film_lista),info_window.destroy()]).pack(pady=10)
+    global window_open
+    if window_open == True:
+        messagebox.showerror("Hiba","Az ablak már meg van nyitva")
     else:
-        Label(info_window, fg="red", text="ELFOGYOTT A HELY!").pack(pady=10)
+        window_open = True
+        info_window = Toplevel()
+        info_window.title("Film Információ")
+        info_window.geometry("300x200")
+        szabad_helyek = kapacitas - foglalt_helyek
+        Label(info_window, text=f"Film: {film_cim}", font=("Arial", 14)).pack(pady=5)
+        Label(info_window, text=f"Összes férőhely: {kapacitas}").pack()
+        Label(info_window, text=f"Foglalt helyek: {foglalt_helyek}").pack()
+        Label(info_window, text=f"Szabad helyek: {szabad_helyek}").pack()
+        if szabad_helyek != 0:
+            Button(info_window, text="Foglalás", command=lambda: [jegyfoglalas_ablak(terem_szam, film_cim, szabad_helyek, frissit_film_lista),info_window.destroy(),window_open == False]).pack(pady=10)
+        else:
+            Label(info_window, fg="red", text="ELFOGYOTT A HELY!").pack(pady=10)
+        Label(info_window, text=f"Összes hátralévő hely: {szabad_helyek}").pack()
 
 def film_kivalasztas(event, film_lista, frissit_film_lista):
     selected_item = film_lista.selection()
