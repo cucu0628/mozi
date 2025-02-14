@@ -26,7 +26,7 @@ c.execute('''CREATE TABLE IF NOT EXISTS foglalasok (
 )''')
 """c.executemany("INSERT INTO termek (terem_szam, film_cim, kapacitas) VALUES (?, ?, ?)", [
     (1, "Titanic", 100),
-    (2, "Inception", 80),
+    (2, "Inception", 3),
     (3, "Interstellar", 120)
 ])"""
 conn.commit()
@@ -53,6 +53,7 @@ def uj_foglalas(keresztnev, vezeteknev, terem_szam, szek_szam):
             c.execute("INSERT INTO foglalasok (keresztnev, vezeteknev, terem_szam, szek_szam) VALUES (?, ?, ?, ?)",
                       (keresztnev, vezeteknev, terem_szam, szek_szam))
             conn.commit()
+            print(keresztnev, vezeteknev, terem_szam, szek_szam)
             return True
     return False
 
@@ -80,23 +81,30 @@ def jegyfoglalas_ablak(terem_szam, film_cim, szabad_helyek, frissit_film_lista):
         keresztnev = keresztnev_entry.get()
         vezeteknev = vezeteknev_entry.get()
         helyek_szama = jegy_szam.get()
-        if keresztnev and vezeteknev:
-            c.execute("SELECT szek_szam FROM foglalasok WHERE terem_szam = ?", (terem_szam,))
-            foglalt_helyek = {row[0] for row in c.fetchall()}
-            sikeres = False
-            for i in range(1, szabad_helyek + 1):
-                if i not in foglalt_helyek and helyek_szama > 0:
-                    if uj_foglalas(keresztnev, vezeteknev, terem_szam, i):
-                        helyek_szama -= 1
-                        sikeres = True
-            if sikeres:
-                messagebox.showinfo("Siker", "Foglalás sikeres!")
-                foglalas_window.destroy()
-                frissit_film_lista()
+        jegy = jegy_szam.get()
+        if szabad_helyek+1 > jegy:
+            if keresztnev and vezeteknev:
+                c.execute("SELECT szek_szam FROM foglalasok WHERE terem_szam = ?", (terem_szam,))
+                foglalt_helyek = {row[0] for row in c.fetchall()}
+                sikeres = False
+                for i in range(1, szabad_helyek + 1):
+                    if i not in foglalt_helyek and helyek_szama > 0:
+                        if uj_foglalas(keresztnev, vezeteknev, terem_szam, i):
+                            if helyek_szama < 0:
+                                messagebox.showerror("Hiba", "Nincs elegendő hely!")
+                            else:
+                                helyek_szama -= 1
+                                sikeres = True
+                if sikeres:
+                    messagebox.showinfo("Siker", "Foglalás sikeres!")
+                    foglalas_window.destroy()
+                    frissit_film_lista()
+                else:
+                    messagebox.showerror("Hiba", "Nem sikerült a foglalás!")
             else:
-                messagebox.showerror("Hiba", "Nem sikerült a foglalás!")
+                messagebox.showerror("Hiba", "Minden mezőt ki kell tölteni!")
         else:
-            messagebox.showerror("Hiba", "Minden mezőt ki kell tölteni!")
+            messagebox.showerror("Hiba","A foglalni kívánt jegyszám meghaladja a hátralévő helyek számát")
 
     Button(foglalas_window, text="Foglalás", command=foglalas).pack(pady=10)
 
@@ -110,9 +118,10 @@ def mutat_film_informacio(terem_szam, film_cim, kapacitas, foglalt_helyek, friss
     Label(info_window, text=f"Foglalt helyek: {foglalt_helyek}").pack()
     Label(info_window, text=f"Szabad helyek: {szabad_helyek}").pack()
     if szabad_helyek != 0:
-        Button(info_window, text="Foglalás", command=lambda: jegyfoglalas_ablak(terem_szam, film_cim, szabad_helyek, frissit_film_lista)).pack(pady=10)
+        Button(info_window, text="Foglalás", command=lambda: [jegyfoglalas_ablak(terem_szam, film_cim, szabad_helyek, frissit_film_lista),info_window.destroy()]).pack(pady=10)
     else:
         Label(info_window, fg="red", text="ELFOGYOTT A HELY!").pack(pady=10)
+    Label(info_window, text=f"Összes hátralévő hely: {szabad_helyek}").pack()
 
 def film_kivalasztas(event, film_lista, frissit_film_lista):
     selected_item = film_lista.selection()
