@@ -24,6 +24,8 @@ c.execute('''CREATE TABLE IF NOT EXISTS foglalasok (
     szek_szam INTEGER,
     FOREIGN KEY (terem_szam) REFERENCES termek(terem_szam)
 )''')
+
+
 """c.executemany("INSERT INTO termek (terem_szam, film_cim, kapacitas) VALUES (?, ?, ?)", [
     (1, "Titanic", 100),
     (2, "Inception", 80),
@@ -53,6 +55,7 @@ def uj_foglalas(keresztnev, vezeteknev, terem_szam, szek_szam):
             c.execute("INSERT INTO foglalasok (keresztnev, vezeteknev, terem_szam, szek_szam) VALUES (?, ?, ?, ?)",
                       (keresztnev, vezeteknev, terem_szam, szek_szam))
             conn.commit()
+            print(keresztnev, vezeteknev, terem_szam, szek_szam)
             return True
     return False
 
@@ -109,7 +112,8 @@ def mutat_film_informacio(terem_szam, film_cim, kapacitas, foglalt_helyek, friss
     Label(info_window, text=f"Összes férőhely: {kapacitas}").pack()
     Label(info_window, text=f"Foglalt helyek: {foglalt_helyek}").pack()
     Label(info_window, text=f"Szabad helyek: {szabad_helyek}").pack()
-    Button(info_window, text="Foglalás", command=lambda: jegyfoglalas_ablak(terem_szam, film_cim, szabad_helyek, frissit_film_lista)).pack(pady=10)
+    if szabad_helyek != 0:
+        Button(info_window, text="Foglalás", command=lambda: jegyfoglalas_ablak(terem_szam, film_cim, szabad_helyek, frissit_film_lista)).pack(pady=10)
 
 def film_kivalasztas(event, film_lista, frissit_film_lista):
     selected_item = film_lista.selection()
