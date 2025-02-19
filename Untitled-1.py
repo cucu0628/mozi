@@ -121,11 +121,17 @@ def mutat_film_informacio(terem_szam, film_cim, kapacitas, foglalt_helyek, friss
     Label(info_window, text=f"Összes férőhely: {kapacitas}").pack()
     Label(info_window, text=f"Foglalt helyek: {foglalt_helyek}").pack()
     Label(info_window, text=f"Szabad helyek: {szabad_helyek}").pack()
+    foglaltsag_szazalek = (foglalt_helyek / kapacitas) * 100 if kapacitas else 0
+    meter_szine = "success" if foglaltsag_szazalek < 40 else "warning" if foglaltsag_szazalek < 90 else "danger"
+    meter = tb.Meter(info_window, bootstyle=meter_szine, subtext="Foglaltság", amountused=foglalt_helyek, amounttotal=kapacitas)
+    meter.pack(pady=10)
     if szabad_helyek != 0:
         Button(info_window, text="Foglalás", command=lambda: [jegyfoglalas_ablak(terem_szam, film_cim, szabad_helyek, frissit_film_lista),info_window.destroy()]).pack(pady=10)
     else:
         Label(info_window, fg="red", text="ELFOGYOTT A HELY!").pack(pady=10)
     Label(info_window, text=f"Összes hátralévő hely: {szabad_helyek}").pack()
+
+
 
 def film_kivalasztas(event, film_lista, frissit_film_lista):
     selected_item = film_lista.selection()
