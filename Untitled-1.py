@@ -1,5 +1,7 @@
 import sqlite3
 import os
+from PIL import Image
+Image.CUBIC = Image.BICUBIC
 import ttkbootstrap as tb
 from ttkbootstrap.constants import *
 from tkinter import messagebox, Toplevel, Entry, Label, Button, IntVar, Spinbox
