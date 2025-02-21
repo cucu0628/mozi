@@ -115,7 +115,7 @@ def jegyfoglalas_ablak(terem_szam, film_cim, szabad_helyek, frissit_film_lista):
 def mutat_film_informacio(terem_szam, film_cim, kapacitas, foglalt_helyek, frissit_film_lista):
     info_window = Toplevel()
     info_window.title("Film Információ")
-    info_window.geometry("300x200")
+    info_window.geometry("350x400")
     szabad_helyek = kapacitas - foglalt_helyek
     Label(info_window, text=f"Film: {film_cim}", font=("Arial", 14)).pack(pady=5)
     Label(info_window, text=f"Összes férőhely: {kapacitas}").pack()
