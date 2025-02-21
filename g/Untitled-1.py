@@ -5,6 +5,7 @@ Image.CUBIC = Image.BICUBIC
 import ttkbootstrap as tb
 from ttkbootstrap.constants import *
 from tkinter import messagebox, Toplevel, Entry, Label, Button, IntVar, Spinbox
+import webbrowser
 
 
 # Adatbázis inicializálása a script mappájában
@@ -155,6 +156,7 @@ def main():
     film_lista.heading("helyek", text="Szabad helyek")
     film_lista.pack(fill=BOTH, expand=True, padx=10, pady=10)
     Button(root, text="Jegy törlés", command=lambda:jegy_torles() ).pack(pady=10)
+    Button(root, text="Film Infók", command=lambda:film_info() ).pack(pady=10)
     
     def frissit_film_lista():
         film_lista.delete(*film_lista.get_children())
@@ -179,10 +181,11 @@ def jegy_torles():
     label = tb.Label(torles_ablak, text="Válassz egy filmet:", font=("Arial", 16))
     label.pack(pady=10)
 
-    film_lista = tb.Treeview(torles_ablak, columns=("terem", "cim", "helyek"), show="headings")
+    film_lista = tb.Treeview(torles_ablak, columns=("terem", "nev", "foglalas","torles"), show="headings")
     film_lista.heading("terem", text="Terem")
-    film_lista.heading("cim", text="Film címe")
-    film_lista.heading("helyek", text="Szabad helyek")
+    film_lista.heading("nev", text="Foglaló neve")
+    film_lista.heading("foglalas", text="Foglalt jegyek")
+    film_lista.heading("torles", text="Törlés")
     film_lista.pack(fill=BOTH, expand=True, padx=10, pady=10)
 
     def frissit_film_lista():
@@ -194,7 +197,15 @@ def jegy_torles():
             foglalt = c.fetchone()[0]
             film_lista.insert("", "end", values=(terem_szam, film_cim, kapacitas - foglalt))
     
+def film_info():
+    info_ablak = Toplevel()
+    info_ablak.title("Film Info")
+    info_ablak.geometry("800x600")
 
+    label = tb.Label(info_ablak, text="Melyikről szeretnél informálódni:", font=("Arial", 16))
+    label.pack(pady=10)
 
+    Button(info_ablak, text="ASD", command=openweb()).pack()
+    def openweb():
 if __name__ == "__main__":
     main()
