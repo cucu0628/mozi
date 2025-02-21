@@ -1,5 +1,7 @@
 import sqlite3
 import os
+from PIL import Image
+Image.CUBIC = Image.BICUBIC
 import ttkbootstrap as tb
 from ttkbootstrap.constants import *
 from tkinter import messagebox, Toplevel, Entry, Label, Button, IntVar, Spinbox
@@ -79,8 +81,6 @@ def jegyfoglalas_ablak(terem_szam, film_cim, szabad_helyek, frissit_film_lista):
     jegy_szam = IntVar(value=1)
     Spinbox(foglalas_window, from_=1, to=szabad_helyek, textvariable=jegy_szam).pack()
 
-
-
     def foglalas():
         keresztnev = keresztnev_entry.get()
         vezeteknev = vezeteknev_entry.get()
@@ -92,6 +92,7 @@ def jegyfoglalas_ablak(terem_szam, film_cim, szabad_helyek, frissit_film_lista):
                 foglalt_helyek = {row[0] for row in c.fetchall()}
                 sikeres = False
                 for i in range(1, szabad_helyek + 1):
+                    print(foglalt_helyek)
                     if i not in foglalt_helyek and helyek_szama > 0:
                         if uj_foglalas(keresztnev, vezeteknev, terem_szam, i):
                             if helyek_szama < 0:
@@ -115,43 +116,22 @@ def jegyfoglalas_ablak(terem_szam, film_cim, szabad_helyek, frissit_film_lista):
 def mutat_film_informacio(terem_szam, film_cim, kapacitas, foglalt_helyek, frissit_film_lista):
     info_window = Toplevel()
     info_window.title("Film Információ")
-    info_window.geometry("300x200")
+    info_window.geometry("350x400")
     szabad_helyek = kapacitas - foglalt_helyek
     Label(info_window, text=f"Film: {film_cim}", font=("Arial", 14)).pack(pady=5)
     Label(info_window, text=f"Összes férőhely: {kapacitas}").pack()
     Label(info_window, text=f"Foglalt helyek: {foglalt_helyek}").pack()
     Label(info_window, text=f"Szabad helyek: {szabad_helyek}").pack()
+    foglaltsag_szazalek = (foglalt_helyek / kapacitas) * 100 if kapacitas else 0
+    meter_szine = "success" if foglaltsag_szazalek < 40 else "warning" if foglaltsag_szazalek < 90 else "danger"
+    meter = tb.Meter(info_window, bootstyle=meter_szine, subtext="Foglaltság", amountused=foglalt_helyek, amounttotal=kapacitas)
+    meter.pack(pady=10)
     if szabad_helyek != 0:
         Button(info_window, text="Foglalás", command=lambda: [jegyfoglalas_ablak(terem_szam, film_cim, szabad_helyek, frissit_film_lista),info_window.destroy()]).pack(pady=10)
     else:
         Label(info_window, fg="red", text="ELFOGYOTT A HELY!").pack(pady=10)
     Label(info_window, text=f"Összes hátralévő hely: {szabad_helyek}").pack()
 
-    meter = tb.Meter(
-    metersize=180,
-    padding=5,
-    amountused=25,
-    metertype="semi",
-    subtext="miles per hour",
-    interactive=True,
-    )
-    meter.pack()
-
-    # update the amount used directly
-    meter.configure(amountused = 50)
-
-    # update the amount used with another widget
-    entry = tb.Entry(textvariable=meter.amountusedvar)
-    entry.pack(fill=X)
-
-    # increment the amount by 10 steps
-    meter.step(10)
-
-    # decrement the amount by 15 steps
-    meter.step(-15)
-
-    # update the subtext
-    meter.configure(subtext="loading...")
 
 
 def film_kivalasztas(event, film_lista, frissit_film_lista):
