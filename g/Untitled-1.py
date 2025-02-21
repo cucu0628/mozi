@@ -91,8 +91,7 @@ def jegyfoglalas_ablak(terem_szam, film_cim, szabad_helyek, frissit_film_lista):
                 c.execute("SELECT szek_szam FROM foglalasok WHERE terem_szam = ?", (terem_szam,))
                 foglalt_helyek = {row[0] for row in c.fetchall()}
                 sikeres = False
-                for i in range(1, szabad_helyek + 1):
-                    print(foglalt_helyek)
+                for i in range(1, 121):
                     if i not in foglalt_helyek and helyek_szama > 0:
                         if uj_foglalas(keresztnev, vezeteknev, terem_szam, i):
                             if helyek_szama < 0:
@@ -155,6 +154,7 @@ def main():
     film_lista.heading("cim", text="Film címe")
     film_lista.heading("helyek", text="Szabad helyek")
     film_lista.pack(fill=BOTH, expand=True, padx=10, pady=10)
+    Button(root, text="Jegy törlés", command=lambda:jegy_torles() ).pack(pady=10)
     
     def frissit_film_lista():
         film_lista.delete(*film_lista.get_children())
@@ -170,6 +170,31 @@ def main():
     film_lista.bind("<Double-1>", lambda event: film_kivalasztas(event, film_lista, frissit_film_lista))
     root.mainloop()
     conn.close()
+
+def jegy_torles():
+    torles_ablak = Toplevel()
+    torles_ablak.title("Jegytölés")
+    torles_ablak.geometry("800x600")
+
+    label = tb.Label(torles_ablak, text="Válassz egy filmet:", font=("Arial", 16))
+    label.pack(pady=10)
+
+    film_lista = tb.Treeview(torles_ablak, columns=("terem", "cim", "helyek"), show="headings")
+    film_lista.heading("terem", text="Terem")
+    film_lista.heading("cim", text="Film címe")
+    film_lista.heading("helyek", text="Szabad helyek")
+    film_lista.pack(fill=BOTH, expand=True, padx=10, pady=10)
+
+    def frissit_film_lista():
+        film_lista.delete(*film_lista.get_children())
+        c.execute("SELECT * FROM termek")
+        for row in c.fetchall():
+            terem_szam, film_cim, kapacitas = row
+            c.execute("SELECT COUNT(*) FROM foglalasok WHERE terem_szam = ?", (terem_szam,))
+            foglalt = c.fetchone()[0]
+            film_lista.insert("", "end", values=(terem_szam, film_cim, kapacitas - foglalt))
+    
+
 
 if __name__ == "__main__":
     main()
