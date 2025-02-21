@@ -91,7 +91,7 @@ def jegyfoglalas_ablak(terem_szam, film_cim, szabad_helyek, frissit_film_lista):
                 c.execute("SELECT szek_szam FROM foglalasok WHERE terem_szam = ?", (terem_szam,))
                 foglalt_helyek = {row[0] for row in c.fetchall()}
                 sikeres = False
-                for i in range(1, szabad_helyek +1):
+                for i in range(1, 121):
                     if i not in foglalt_helyek and helyek_szama > 0:
                         if uj_foglalas(keresztnev, vezeteknev, terem_szam, i):
                             if helyek_szama < 0:
