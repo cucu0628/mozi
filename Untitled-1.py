@@ -141,6 +141,28 @@ def film_kivalasztas(event, film_lista, frissit_film_lista):
         foglalt_helyek = c.fetchone()[0]
         mutat_film_informacio(int(terem_szam), film_cim, int(szabad_helyek) + foglalt_helyek, foglalt_helyek, frissit_film_lista)
 
+def jegyek_listazasa():
+    jegyek_window = Toplevel()
+    jegyek_window.title("Vásárolt Jegyek")
+    jegyek_window.geometry("500x400")
+    
+    Label(jegyek_window, text="Vásárolt Jegyek", font=("Arial", 14)).pack(pady=5)
+    
+    jegy_lista = tb.Treeview(jegyek_window, columns=("keresztnev", "vezeteknev", "terem", "jegyszam", "szekek"), show="headings")
+    jegy_lista.heading("keresztnev", text="Keresztnév")
+    jegy_lista.heading("vezeteknev", text="Vezetéknév")
+    jegy_lista.heading("terem", text="Terem")
+    jegy_lista.heading("jegyszam", text="Jegyek száma")
+    jegy_lista.heading("szekek", text="Székek")
+    jegy_lista.pack(fill=BOTH, expand=True, padx=10, pady=10)
+    
+    c.execute("SELECT keresztnev, vezeteknev, terem_szam, GROUP_CONCAT(szek_szam) FROM foglalasok GROUP BY keresztnev, vezeteknev, terem_szam")
+    for row in c.fetchall():
+        keresztnev, vezeteknev, terem_szam, szekek = row
+        szek_lista = list(map(int, szekek.split(',')))
+        szekek_range = f"{min(szek_lista)}-{max(szek_lista)}" if len(szek_lista) > 1 else str(szek_lista[0])
+        jegy_lista.insert("", "end", values=(keresztnev, vezeteknev, terem_szam, len(szek_lista), szekek_range))
+
 def main():
     root = tb.Window(themename="superhero")
     root.title("Mozi Jegyfoglaló Rendszer")
@@ -167,6 +189,10 @@ def main():
     frissit_film_lista()
     
     film_lista.bind("<Double-1>", lambda event: film_kivalasztas(event, film_lista, frissit_film_lista))
+    
+    jegyek_gomb = Button(root, text="Megvásárolt jegyek", command=jegyek_listazasa)
+    jegyek_gomb.pack(pady=10)
+    
     root.mainloop()
     conn.close()
 
