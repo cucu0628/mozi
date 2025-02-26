@@ -144,7 +144,7 @@ def film_kivalasztas(event, film_lista, frissit_film_lista):
 def jegyek_listazasa():
     jegyek_window = Toplevel()
     jegyek_window.title("Vásárolt Jegyek")
-    jegyek_window.geometry("500x400")
+    jegyek_window.geometry("1100x400")
     
     Label(jegyek_window, text="Vásárolt Jegyek", font=("Arial", 14)).pack(pady=5)
     
@@ -154,6 +154,13 @@ def jegyek_listazasa():
     jegy_lista.heading("terem", text="Terem")
     jegy_lista.heading("jegyszam", text="Jegyek száma")
     jegy_lista.heading("szekek", text="Székek")
+
+    jegy_lista.column("keresztnev", anchor="center")
+    jegy_lista.column("vezeteknev", anchor="center")
+    jegy_lista.column("terem", anchor="center")
+    jegy_lista.column("jegyszam", anchor="center")
+    jegy_lista.column("szekek", anchor="center")
+
     jegy_lista.pack(fill=BOTH, expand=True, padx=10, pady=10)
     
     c.execute("SELECT keresztnev, vezeteknev, terem_szam, GROUP_CONCAT(szek_szam) FROM foglalasok GROUP BY keresztnev, vezeteknev, terem_szam")
