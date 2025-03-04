@@ -141,21 +141,34 @@ def film_kivalasztas(event, film_lista, frissit_film_lista):
         foglalt_helyek = c.fetchone()[0]
         mutat_film_informacio(int(terem_szam), film_cim, int(szabad_helyek) + foglalt_helyek, foglalt_helyek, frissit_film_lista)
 
-def jegyek_listazasa():
+def jegyek_listazasa(frissit_film_lista):
     def torol_jegyet():
         selected_item = jegy_lista.selection()
         if selected_item:
             values = jegy_lista.item(selected_item, "values")
             keresztnev, vezeteknev, terem_szam, szekek = values
-            szek_lista = szekek.split(', ')
-            for szek in szek_lista:
+            szek_lista = szekek.split(",")
+
+            for szek_szam in szek_lista:
                 c.execute("DELETE FROM foglalasok WHERE keresztnev = ? AND vezeteknev = ? AND terem_szam = ? AND szek_szam = ?", 
-                          (keresztnev, vezeteknev, terem_szam, int(szek)))
+                        (keresztnev, vezeteknev, terem_szam, szek_szam.strip()))
+            
             conn.commit()
-            jegy_lista.delete(selected_item)
+
+            # Frissítés törlés után
+            jegy_lista.delete(*jegy_lista.get_children())  # Jegylista frissítése
+            c.execute("SELECT keresztnev, vezeteknev, terem_szam, GROUP_CONCAT(szek_szam) FROM foglalasok GROUP BY keresztnev, vezeteknev, terem_szam")
+            for row in c.fetchall():
+                jegy_lista.insert("", "end", values=row)
+
+            frissit_film_lista()  # Szabad helyek frissítése
+
             messagebox.showinfo("Siker", "A jegy(ek) törölve lettek!")
         else:
             messagebox.showerror("Hiba", "Nincs kijelölt jegy törlésre!")
+
+
+
     
     jegyek_window = Toplevel()
     jegyek_window.title("Vásárolt Jegyek")
@@ -163,29 +176,19 @@ def jegyek_listazasa():
     
     Label(jegyek_window, text="Vásárolt Jegyek", font=("Arial", 14)).pack(pady=5)
     
-    jegy_lista = tb.Treeview(jegyek_window, columns=("keresztnev", "vezeteknev", "terem", "szekek"), show="headings")
+    jegy_lista = tb.Treeview(jegyek_window, columns=("keresztnev", "vezeteknev", "terem", "szek"), show="headings")
     jegy_lista.heading("keresztnev", text="Keresztnév")
     jegy_lista.heading("vezeteknev", text="Vezetéknév")
     jegy_lista.heading("terem", text="Terem")
-    jegy_lista.heading("szekek", text="Székek")
+    jegy_lista.heading("szek", text="Székek")
     jegy_lista.pack(fill=BOTH, expand=True, padx=10, pady=10)
     
-    c.execute("SELECT keresztnev, vezeteknev, terem_szam, szek_szam FROM foglalasok ORDER BY keresztnev, vezeteknev, terem_szam, szek_szam")
-    foglalasok = c.fetchall()
-    
-    foglalas_dict = {}
-    for keresztnev, vezeteknev, terem_szam, szek_szam in foglalasok:
-        key = (keresztnev, vezeteknev, terem_szam)
-        if key not in foglalas_dict:
-            foglalas_dict[key] = []
-        foglalas_dict[key].append(szek_szam)
-    
-    for (keresztnev, vezeteknev, terem_szam), szek_lista in foglalas_dict.items():
-        szek_lista.sort()
-        szek_string = ', '.join(map(str, szek_lista))
-        jegy_lista.insert("", "end", values=(keresztnev, vezeteknev, terem_szam, szek_string))
+    c.execute("SELECT keresztnev, vezeteknev, terem_szam, GROUP_CONCAT(szek_szam) FROM foglalasok GROUP BY keresztnev, vezeteknev, terem_szam")
+    for row in c.fetchall():
+        jegy_lista.insert("", "end", values=row)
     
     torles_gomb = Button(jegyek_window, text="Kijelölt jegy törlése", command=torol_jegyet)
+    torles_gomb.pack(pady=10)
     torles_gomb.pack(pady=10)
 
 def main():
@@ -215,7 +218,7 @@ def main():
     
     film_lista.bind("<Double-1>", lambda event: film_kivalasztas(event, film_lista, frissit_film_lista))
     
-    jegyek_gomb = Button(root, text="Megvásárolt jegyek", command=jegyek_listazasa)
+    jegyek_gomb = Button(root, text="Megvásárolt jegyek", command=lambda: jegyek_listazasa(frissit_film_lista))
     jegyek_gomb.pack(pady=10)
     
     root.mainloop()
