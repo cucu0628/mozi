@@ -5,6 +5,7 @@ Image.CUBIC = Image.BICUBIC
 import ttkbootstrap as tb
 from ttkbootstrap.constants import *
 from tkinter import messagebox, Toplevel, Entry, Label, Button, IntVar, Spinbox
+from fpdf import FPDF
 
 
 # Adatbázis inicializálása a script mappájában
@@ -147,49 +148,62 @@ def jegyek_listazasa(frissit_film_lista):
         if selected_item:
             values = jegy_lista.item(selected_item, "values")
             keresztnev, vezeteknev, terem_szam, szekek = values
-            szek_lista = szekek.split(",")
-
+            szek_lista = szekek.split(", ")
             for szek_szam in szek_lista:
                 c.execute("DELETE FROM foglalasok WHERE keresztnev = ? AND vezeteknev = ? AND terem_szam = ? AND szek_szam = ?", 
-                        (keresztnev, vezeteknev, terem_szam, szek_szam.strip()))
-            
+                          (keresztnev, vezeteknev, terem_szam, szek_szam))
             conn.commit()
-
-            # Frissítés törlés után
-            jegy_lista.delete(*jegy_lista.get_children())  # Jegylista frissítése
-            c.execute("SELECT keresztnev, vezeteknev, terem_szam, GROUP_CONCAT(szek_szam) FROM foglalasok GROUP BY keresztnev, vezeteknev, terem_szam")
-            for row in c.fetchall():
-                jegy_lista.insert("", "end", values=row)
-
-            frissit_film_lista()  # Szabad helyek frissítése
-
+            jegyek_window.destroy()
+            jegyek_listazasa(frissit_film_lista)
+            frissit_film_lista()
             messagebox.showinfo("Siker", "A jegy(ek) törölve lettek!")
         else:
             messagebox.showerror("Hiba", "Nincs kijelölt jegy törlésre!")
 
+    def pdf_keszitese():
+        selected_item = jegy_lista.selection()
+        if selected_item:
+            values = jegy_lista.item(selected_item, "values")
+            jegy_pdf_keszitese(values)
+        else:
+            messagebox.showerror("Hiba", "Nincs kijelölt jegy a PDF készítéshez!")
 
-
-    
     jegyek_window = Toplevel()
     jegyek_window.title("Vásárolt Jegyek")
-    jegyek_window.geometry("1100x400")
-    
+    jegyek_window.geometry("500x400")
+
     Label(jegyek_window, text="Vásárolt Jegyek", font=("Arial", 14)).pack(pady=5)
-    
+
     jegy_lista = tb.Treeview(jegyek_window, columns=("keresztnev", "vezeteknev", "terem", "szek"), show="headings")
     jegy_lista.heading("keresztnev", text="Keresztnév")
     jegy_lista.heading("vezeteknev", text="Vezetéknév")
     jegy_lista.heading("terem", text="Terem")
     jegy_lista.heading("szek", text="Székek")
     jegy_lista.pack(fill=BOTH, expand=True, padx=10, pady=10)
-    
+
     c.execute("SELECT keresztnev, vezeteknev, terem_szam, GROUP_CONCAT(szek_szam) FROM foglalasok GROUP BY keresztnev, vezeteknev, terem_szam")
     for row in c.fetchall():
         jegy_lista.insert("", "end", values=row)
-    
+
     torles_gomb = Button(jegyek_window, text="Kijelölt jegy törlése", command=torol_jegyet)
     torles_gomb.pack(pady=10)
-    torles_gomb.pack(pady=10)
+
+    pdf_gomb = Button(jegyek_window, text="PDF generálása", command=pdf_keszitese)
+    pdf_gomb.pack(pady=10)
+
+def jegy_pdf_keszitese(values):
+    keresztnev, vezeteknev, terem_szam, szekek = values
+    pdf = FPDF()
+    pdf.add_page()
+    pdf.set_font("Arial", size=12)
+    pdf.cell(200, 10, f"Mozi Jegy", ln=True, align="C")
+    pdf.ln(10)
+    pdf.cell(200, 10, f"Név: {keresztnev} {vezeteknev}", ln=True)
+    pdf.cell(200, 10, f"Terem: {terem_szam}", ln=True)
+    pdf.cell(200, 10, f"Székek: {szekek}", ln=True)
+    pdf.output("jegy.pdf")
+    messagebox.showinfo("Siker", "PDF jegy létrehozva!")
+
 
 def main():
     root = tb.Window(themename="superhero")
