@@ -206,7 +206,7 @@ def jegy_pdf_keszitese(values):
 
 
 def main():
-    root = tb.Window(themename="superhero")
+    root = tb.Window(themename="newtheme")
     root.title("Mozi Jegyfoglaló Rendszer")
     root.geometry("800x600")
     
