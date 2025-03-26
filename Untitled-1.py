@@ -193,20 +193,55 @@ def jegyek_listazasa(frissit_film_lista):
 
 def jegy_pdf_keszitese(values):
     keresztnev, vezeteknev, terem_szam, szekek = values
+    
     pdf = FPDF()
     pdf.add_page()
-    pdf.set_font("Arial", size=12)
-    pdf.cell(200, 10, f"Mozi Jegy", ln=True, align="C")
+
+    # Háttérszín (világos krémszín, hogy vintage hangulatot adjon)
+    pdf.set_fill_color(255, 249, 212)  # Halvány krémszín
+    pdf.rect(0, 0, 210, 297, 'F')  # Háttér színezése
+
+    # Díszes szegélyek
+    pdf.set_line_width(1.5)
+    pdf.set_draw_color(205, 127, 50)  # Arany színű szegély
+    pdf.rect(5, 5, 200, 287)  # Teli szegély
+
+    # Díszes minták a szegélyekben
+    pdf.set_draw_color(205, 127, 50)
+    for i in range(5, 200, 30):  # Szegély mintázása
+        pdf.line(i, 5, i + 20, 20)
+        pdf.line(i, 287, i + 20, 267)
+
+    # Cím díszítése
+    pdf.set_font("Times", style='B', size=24)
+    pdf.set_text_color(153, 101, 21)  # Sötét arany szín
+    pdf.cell(200, 15, "MOZI JEGY", ln=True, align="C")
     pdf.ln(10)
+
+    # Információk kiírása
+    pdf.set_font("Times", size=14)
+    pdf.set_text_color(0, 0, 0)  # Fekete szöveg
     pdf.cell(200, 10, f"Név: {keresztnev} {vezeteknev}", ln=True)
     pdf.cell(200, 10, f"Terem: {terem_szam}", ln=True)
     pdf.cell(200, 10, f"Székek: {szekek}", ln=True)
-    pdf.output("jegy.pdf")
+    
+    # Aláírás
+    pdf.ln(20)
+    pdf.set_font("Times", style='I', size=12)
+    pdf.cell(200, 10, "______________________________", ln=True, align="C")
+    pdf.cell(200, 10, "Aláírás", ln=True, align="C")
+
+    # Díszítő grafika (pl. mozi filmtekercs ikona)
+    # Itt hozzáadhatnál egy kis képet vagy grafikát, például egy filmtekercset
+    # pdf.image("mozi_logo.png", 150, 250, 40)
+
+    # PDF mentése
+    pdf.output(f"jegyek/{keresztnev}.pdf")
     messagebox.showinfo("Siker", "PDF jegy létrehozva!")
 
 
 def main():
-    root = tb.Window(themename="newtheme")
+    root = tb.Window(themename="superhero")
     root.title("Mozi Jegyfoglaló Rendszer")
     root.geometry("800x600")
     
