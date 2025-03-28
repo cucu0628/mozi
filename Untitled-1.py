@@ -233,7 +233,7 @@ def jegy_pdf_keszitese(values):
 
     # Díszítő grafika (pl. mozi filmtekercs ikona)
     # Itt hozzáadhatnál egy kis képet vagy grafikát, például egy filmtekercset
-    # pdf.image("mozi_logo.png", 150, 250, 40)
+    #pdf.image("tekercs.png", 150, 250, 40)
 
     # PDF mentése
     pdf.output(f"jegyek/{keresztnev}.pdf")
@@ -241,7 +241,7 @@ def jegy_pdf_keszitese(values):
 
 
 def main():
-    root = tb.Window(themename="superhero")
+    root = tb.Window(themename="newtheme")
     root.title("Mozi Jegyfoglaló Rendszer")
     root.geometry("800x600")
     
