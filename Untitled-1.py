@@ -148,10 +148,21 @@ def jegyek_listazasa(frissit_film_lista):
         if selected_item:
             values = jegy_lista.item(selected_item, "values")
             keresztnev, vezeteknev, terem_szam, szekek = values
-            szek_lista = szekek.split(", ")
+            
+            # A székek listájának szétválasztása a ', ' helyett ','-el, majd a számokká alakítás
+            szek_lista = szekek.split(",")  # Az új szétválasztó karakter ','
+            
+            # Kiíratjuk, hogy mely székek kerülnek törlésre
+            print(f"Törlés előtt: {keresztnev} {vezeteknev} {terem_szam} székek: {szek_lista}")
+
+            # Minden szék törlése a foglalás táblából
             for szek_szam in szek_lista:
+                szek_szam = szek_szam.strip()  # Eltávolítjuk a fölösleges szóközöket
                 c.execute("DELETE FROM foglalasok WHERE keresztnev = ? AND vezeteknev = ? AND terem_szam = ? AND szek_szam = ?", 
-                          (keresztnev, vezeteknev, terem_szam, szek_szam))
+                        (keresztnev, vezeteknev, int(terem_szam), int(szek_szam)))  # Szék számokat egész számként kezeljük
+                # Kiírjuk a törölt rekordot
+                print(f"Törlés végrehajtva: {keresztnev} {vezeteknev} {terem_szam} szék: {szek_szam}")
+            
             conn.commit()
             jegyek_window.destroy()
             jegyek_listazasa(frissit_film_lista)
@@ -159,6 +170,10 @@ def jegyek_listazasa(frissit_film_lista):
             messagebox.showinfo("Siker", "A jegy(ek) törölve lettek!")
         else:
             messagebox.showerror("Hiba", "Nincs kijelölt jegy törlésre!")
+
+
+
+
 
     def pdf_keszitese():
         selected_item = jegy_lista.selection()
