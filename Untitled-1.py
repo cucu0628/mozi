@@ -70,11 +70,11 @@ def jegyfoglalas_ablak(terem_szam, film_cim, szabad_helyek, frissit_film_lista):
     Label(foglalas_window, text=f"Film: {film_cim}", font=("Arial", 14)).pack(pady=5)
     Label(foglalas_window, text=f"Szabad helyek: {szabad_helyek}", font=("Arial", 12)).pack(pady=5)
 
-    Label(foglalas_window, text="Keresztnév:").pack()
+    Label(foglalas_window, text="Vezetéknév:").pack()
     keresztnev_entry = Entry(foglalas_window)
     keresztnev_entry.pack()
 
-    Label(foglalas_window, text="Vezetéknév:").pack()
+    Label(foglalas_window, text="Keresztnév:").pack()
     vezeteknev_entry = Entry(foglalas_window)
     vezeteknev_entry.pack()
 
@@ -175,8 +175,8 @@ def jegyek_listazasa(frissit_film_lista):
     Label(jegyek_window, text="Vásárolt Jegyek", font=("Arial", 14)).pack(pady=5)
 
     jegy_lista = tb.Treeview(jegyek_window, columns=("keresztnev", "vezeteknev", "terem", "szek"), show="headings")
-    jegy_lista.heading("keresztnev", text="Keresztnév")
-    jegy_lista.heading("vezeteknev", text="Vezetéknév")
+    jegy_lista.heading("keresztnev", text="Vezetéknév")
+    jegy_lista.heading("vezeteknev", text="Keresztnév")
     jegy_lista.heading("terem", text="Terem")
     jegy_lista.heading("szek", text="Székek")
     jegy_lista.pack(fill=BOTH, expand=True, padx=10, pady=10)
