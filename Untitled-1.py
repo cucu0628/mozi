@@ -170,7 +170,7 @@ def jegyek_listazasa(frissit_film_lista):
 
     jegyek_window = Toplevel()
     jegyek_window.title("Vásárolt Jegyek")
-    jegyek_window.geometry("500x400")
+    jegyek_window.geometry("1000x400")
 
     Label(jegyek_window, text="Vásárolt Jegyek", font=("Arial", 14)).pack(pady=5)
 
