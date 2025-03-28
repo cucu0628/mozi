@@ -236,7 +236,8 @@ def jegy_pdf_keszitese(values):
     #pdf.image("tekercs.png", 150, 250, 40)
 
     # PDF mentése
-    pdf.output(f"jegyek/{keresztnev}.pdf")
+    pdf_path = os.path.join(f"{script_dir}\jegyek", f"{keresztnev}.pdf")
+    pdf.output(f"{pdf_path}")
     messagebox.showinfo("Siker", "PDF jegy létrehozva!")
 
 
