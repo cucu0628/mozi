@@ -251,13 +251,13 @@ def jegy_pdf_keszitese(values):
     #pdf.image("tekercs.png", 150, 250, 40)
 
     # PDF mentése
-    pdf_path = os.path.join(f"{script_dir}\jegyek", f"{keresztnev}.pdf")
-    pdf.output(f"{pdf_path}")
+    pdf_path = os.path.join(script_dir, "jegyek", f"{keresztnev}.pdf")
+    pdf.output(pdf_path)
     messagebox.showinfo("Siker", "PDF jegy létrehozva!")
 
 
 def main():
-    root = tb.Window(themename="newtheme")
+    root = tb.Window(themename="superhero")
     root.title("Mozi Jegyfoglaló Rendszer")
     root.geometry("800x600")
     
